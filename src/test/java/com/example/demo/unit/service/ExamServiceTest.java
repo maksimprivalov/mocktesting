@@ -43,12 +43,12 @@ public class ExamServiceTest {
         student.setExams(Set.of(exam));
     }
     @BeforeMethod
-    public void init() throws Exception{
+    public void init(){
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void studentNotFoundExceptionTest() throws Exception {
+    public void studentNotFoundExceptionTest() {
         when(studentRepository.findByIdentificationNumber(nonExistentIdentificationNumber)).thenReturn(Optional.empty());
         assertThrows(StudentNotFoundException.class, () -> {
             examService.examApplication(nonExistentIdentificationNumber, exam.getId());
