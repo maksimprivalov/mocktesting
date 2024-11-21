@@ -31,13 +31,16 @@ public class ExamServiceTest {
     Long nonExistentId = 1L;
     private Student student = new Student();
     private Exam exam = new Exam();
+    private Exam examWithBadDate = new Exam(1000L, new Date(0, 1, 1), new Date(0, 1, 1), student);
+    private Exam examWithGoodDateButPassedTrue = new Exam(100L, new Date(126, 1, 1), new Date(), student);
 
     {
+        examWithGoodDateButPassedTrue.setPassed(true);
         student.setId(11L);
         student.setLastName("Jovanovic");
         student.setFirstName("Jovan");
         student.setIdentificationNumber("SV18/2025");
-        exam.setExamDate(new Date());
+        exam.setExamDate(new Date(126, 1, 1));
         exam.setGrade(9);
         exam.setPassed(false);
         exam.setStudent(student);
@@ -79,5 +82,25 @@ public class ExamServiceTest {
         when(examRepository.findById(exam.getId())).thenReturn(Optional.of(exam));
 
         assertEquals(examRepository.findById(exam.getId()), Optional.of(exam));
+    }
+
+    @Test
+    public void examWasNotYetTest() throws Exception {
+        when(studentRepository.findByIdentificationNumber(student.getIdentificationNumber())).thenReturn(Optional.of(student));
+        when(examRepository.findById(examWithBadDate.getId())).thenReturn(Optional.of(examWithBadDate));
+        assertFalse(examService.examApplication(student.getIdentificationNumber(), examWithBadDate.getId()));
+    }
+
+    @Test
+    public void examWasAlreadyPassed() throws Exception {
+        when(studentRepository.findByIdentificationNumber(student.getIdentificationNumber())).thenReturn(Optional.of(student));
+        when(examRepository.findById(examWithGoodDateButPassedTrue.getId())).thenReturn(Optional.of(examWithGoodDateButPassedTrue));
+        assertFalse(examService.examApplication(student.getIdentificationNumber(), examWithGoodDateButPassedTrue.getId()));
+    }
+    @Test
+    public void goodVariationTest() throws Exception {
+        when(studentRepository.findByIdentificationNumber(student.getIdentificationNumber())).thenReturn(Optional.of(student));
+        when(examRepository.findById(exam.getId())).thenReturn(Optional.of(exam));
+        assertTrue(examService.examApplication(student.getIdentificationNumber(), exam.getId()));
     }
 }
