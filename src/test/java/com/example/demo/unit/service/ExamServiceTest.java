@@ -1,5 +1,6 @@
 package com.example.demo.unit.service;
 
+import com.example.demo.exception.ExamNotFoundException;
 import com.example.demo.exception.StudentNotFoundException;
 import com.example.demo.model.Exam;
 import com.example.demo.model.Student;
@@ -27,6 +28,7 @@ public class ExamServiceTest {
     @InjectMocks
     private ExamService examService;
     String nonExistentIdentificationNumber = "INVALID_ID";
+    Long nonExistentId = 1L;
     private Student student = new Student();
     private Exam exam = new Exam();
 
@@ -53,5 +55,29 @@ public class ExamServiceTest {
         assertThrows(StudentNotFoundException.class, () -> {
             examService.examApplication(nonExistentIdentificationNumber, exam.getId());
         });
+    }
+    @Test
+    public void studentIsFoundTest() {
+        when(studentRepository.findByIdentificationNumber(student.getIdentificationNumber())).thenReturn(Optional.of(student));
+        assertEquals(studentRepository.findByIdentificationNumber(student.getIdentificationNumber()), Optional.of(student));
+    }
+
+    @Test
+    public void examNotFoundExceptionTest() {
+        when(studentRepository.findByIdentificationNumber(student.getIdentificationNumber())).thenReturn(Optional.of(student));
+
+        when(examRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+        assertThrows(ExamNotFoundException.class, () -> {
+            examService.examApplication(student.getIdentificationNumber(), nonExistentId);
+        });
+    }
+
+    @Test
+    public void examFoundTest() throws Exception {
+        //when(studentRepository.findByIdentificationNumber(student.getIdentificationNumber())).thenReturn(Optional.of(student));
+
+        when(examRepository.findById(exam.getId())).thenReturn(Optional.of(exam));
+
+        assertEquals(examRepository.findById(exam.getId()), Optional.of(exam));
     }
 }
